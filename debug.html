@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PhysicsTOV Debug</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #121212;
+      color: #e6e6e6;
+    }
+    .page {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    h1 {
+      margin-top: 0;
+    }
+    .card {
+      background: #1e1e1e;
+      border: 1px solid #333;
+      border-radius: 12px;
+      padding: 18px;
+      margin-bottom: 18px;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+    }
+    input {
+      width: 100%;
+      max-width: 240px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid #444;
+      background: #0f0f0f;
+      color: #fff;
+    }
+    button {
+      margin-top: 12px;
+      padding: 10px 16px;
+      border-radius: 10px;
+      border: none;
+      background: #3a7bfd;
+      color: white;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+    button:hover {
+      background: #5b8dff;
+    }
+    pre {
+      white-space: pre-wrap;
+      word-break: break-word;
+      background: #090909;
+      padding: 16px;
+      border-radius: 12px;
+      border: 1px solid #222;
+      max-height: 500px;
+      overflow: auto;
+    }
+    .status {
+      margin-top: 8px;
+      font-size: 0.95rem;
+      color: #c7d0ff;
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <h1>PhysicsTOV Debug Viewer</h1>
+    <div class="card">
+      <p>Fetch the Flask model endpoint and display the JSON server output.</p>
+      <form id="debug-form">
+        <label>
+          k
+          <input type="number" step="any" name="k" value="1.46e-2" />
+        </label>
+        <label>
+          gamma
+          <input type="number" step="any" name="gamma" value="2.0" />
+        </label>
+        <label>
+          i
+          <input type="number" step="any" name="i" value="0" />
+        </label>
+        <button type="submit">Fetch /model</button>
+      </form>
+      <div class="status" id="status">Ready</div>
+    </div>
+    <div class="card">
+      <h2>Response</h2>
+      <pre id="output">No response yet.</pre>
+    </div>
+  </div>
+  <script>
+    const form = document.getElementById('debug-form');
+    const status = document.getElementById('status');
+    const output = document.getElementById('output');
+
+    async function fetchModel(event) {
+      event.preventDefault();
+      const data = new FormData(form);
+      const params = new URLSearchParams();
+      for (const [key, value] of data.entries()) {
+        if (value !== '') params.set(key, value);
+      }
+      const url = `/model?${params.toString()}`;
+      status.textContent = `Fetching ${url}...`;
+      output.textContent = '';
+      try {
+        const response = await fetch(url);
+        const text = await response.text();
+        if (!response.ok) {
+          status.textContent = `Error ${response.status}: ${response.statusText}`;
+          output.textContent = text;
+          return;
+        }
+        const json = JSON.parse(text);
+        status.textContent = `Success (${response.status})`;
+        output.textContent = JSON.stringify(json, null, 2);
+      } catch (err) {
+        status.textContent = 'Fetch failed';
+        output.textContent = String(err);
+      }
+    }
+
+    form.addEventListener('submit', fetchModel);
+  </script>
+</body>
+</html>
