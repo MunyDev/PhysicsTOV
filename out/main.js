@@ -1700,7 +1700,7 @@
   var sqrDist = squaredDistance;
   var len = length;
   var sqrLen = squaredLength;
-  var forEach = function() {
+  var forEach = (function() {
     var vec = create2();
     return function(a, stride, offset, count, fn, arg) {
       var i, l;
@@ -1726,7 +1726,7 @@
       }
       return a;
     };
-  }();
+  })();
 
   // renderer.js
   var canvas = document.createElement("canvas");
